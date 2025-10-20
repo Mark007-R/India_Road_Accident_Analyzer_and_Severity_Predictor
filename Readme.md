@@ -77,39 +77,38 @@ pip install -r requirements.txt
 # Run the Streamlit app
 streamlit run app.py
 Open in browser: http://localhost:8501
+## 📊 Features
 
-📊 Features
-Dynamic Filters: Filter by State, City, or Year
+- **Dynamic Filters:** Filter by State, City, or Year  
+- **Key Metrics:** Total accidents, fatalities, and casualties  
 
-Key Metrics: Total accidents, fatalities, casualties
+### Visualizations
+- Pie chart: Accident severity  
+- Bar charts: Vehicle type, day of week, causes, time of day  
+- Area chart: Monthly trends  
+- Line chart: Long-term trends  
+- Scatter plot: Fatalities vs casualties  
+- Interactive Map: Accident hotspots with Folium  
 
-Visualizations
-Pie chart: Accident severity
+- **ML Prediction:** Predict accident severity using vehicle type, day of week, fatalities, and casualties  
 
-Bar charts: Vehicle type, day of week, causes, time of day
+---
 
-Area chart: Monthly trends
+## 🧠 Machine Learning Module
 
-Line chart: Long-term trends
+- **Model:** Random Forest Classifier  
+- **Features:** Vehicle Type, Day of Week, Number of Fatalities, Number of Casualties  
+- **Target:** Accident Severity  
+- **Usage:** Enter values in the sidebar and predict severity instantly  
 
-Scatter plot: Fatalities vs casualties
+---
 
-Interactive Map: Accident hotspots with Folium
+## 🌐 Tech Stack
 
-ML Prediction: Predict accident severity using vehicle type, day of week, fatalities, and casualties
-
-🧠 Machine Learning Module
-Model: Random Forest Classifier
-
-Features: Vehicle Type, Day of Week, Number of Fatalities, Number of Casualties
-
-Target: Accident Severity
-
-Usage: Enter values in the sidebar and predict severity instantly
-
-🌐 Tech Stack
-Python, Streamlit, Pandas, Plotly, Folium
-
-Scikit-learn
-
-HTML/CSS templates
+- Python  
+- Streamlit  
+- Pandas  
+- Plotly  
+- Folium  
+- Scikit-learn  
+- HTML/CSS templates  
