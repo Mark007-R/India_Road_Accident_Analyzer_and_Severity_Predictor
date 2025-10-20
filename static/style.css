@@ -1,0 +1,150 @@
+/* General */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f6f8;
+    color: #333;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 30px 0;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 36px;
+}
+
+/* Main container */
+.main-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #fff;
+    padding: 25px;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+    min-height: calc(100vh - 120px);
+}
+
+.sidebar h3 {
+    color: #667eea;
+    margin-top: 20px;
+}
+
+.sidebar select,
+.sidebar button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.sidebar button {
+    background: #667eea;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sidebar button:hover {
+    background: #764ba2;
+}
+
+/* Content */
+.content {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Metrics */
+.metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.metric-card {
+    background: white;
+    padding: 35px 45px;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    flex: 1 1 220px;
+}
+
+.metric-card h3 {
+    color: #667eea;
+    margin-bottom: 12px;
+}
+
+.metric-card p {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Charts */
+.charts {
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+}
+
+.chart-box {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.chart-box h2 {
+    color: #667eea;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+/* Map */
+.map {
+    margin-top: 40px;
+}
+
+.map h2 {
+    color: #667eea;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+/* Footer */
+footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 18px 0;
+    margin-top: 60px;
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+    .main-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+    }
+}

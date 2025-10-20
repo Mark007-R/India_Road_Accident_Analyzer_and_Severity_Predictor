@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>India Road Accidents Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>🚦 India Road Accidents Dashboard</h1>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <form method="POST">
+                <h3>Filter by State</h3>
+                <select name="state">
+                    <option value="All">All States</option>
+                    {% for s in states %}
+                    <option value="{{ s }}" {% if selected_state==s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+
+                <h3>Filter by City</h3>
+                <select name="city">
+                    <option value="All">All Cities</option>
+                    {% for c in cities %}
+                    <option value="{{ c }}" {% if selected_city==c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+
+                <h3>Filter by Year</h3>
+                <select name="year">
+                    <option value="All">All Years</option>
+                    {% for y in years %}
+                    <option value="{{ y }}" {% if selected_year==y %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Apply Filters</button>
+            </form>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Metrics -->
+            <section class="metrics">
+                <div class="metric-card">
+                    <h3>Total Accidents</h3>
+                    <p>{{ total_accidents }}</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Fatalities</h3>
+                    <p>{{ total_fatalities }}</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Total Casualties</h3>
+                    <p>{{ total_casualties }}</p>
+                </div>
+            </section>
+
+            <!-- Charts -->
+            <section class="charts">
+                <div class="chart-box">
+                    <h2>Accident Severity Distribution</h2>
+                    <div id="severity-chart"></div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>Accidents by Vehicle Type</h2>
+                    <div id="vehicle-chart"></div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>Accidents by Day of Week</h2>
+                    <div id="day-chart"></div>
+                </div>
+
+                {% if fig_month_json %}
+                <div class="chart-box">
+                    <h2>Monthly Accidents Trend</h2>
+                    <div id="month-chart"></div>
+                </div>
+                {% endif %}
+
+                <div class="chart-box">
+                    <h2>Top Accident Causes</h2>
+                    <div id="cause-chart"></div>
+                </div>
+
+                <div class="chart-box">
+                    <h2>Long-term Trend</h2>
+                    <div id="trend-chart"></div>
+                </div>
+            </section>
+
+            <!-- Map -->
+            {% if map_html %}
+            <section class="map">
+                <h2>Accident Hotspots Map</h2>
+                {{ map_html | safe }}
+            </section>
+            {% endif %}
+        </main>
+    </div>
+
+    <footer>
+        <p>Data Source: Government of India | Made with Flask & Plotly</p>
+    </footer>
+
+    <!-- Plotly Scripts -->
+    <script>
+        Plotly.newPlot('severity-chart', {{ severity_json | safe }}.data, {{ severity_json | safe }}.layout);
+        Plotly.newPlot('vehicle-chart', {{ vehicle_json | safe }}.data, {{ vehicle_json | safe }}.layout);
+        Plotly.newPlot('day-chart', {{ day_json | safe }}.data, {{ day_json | safe }}.layout);
+        {% if fig_month_json %}
+        Plotly.newPlot('month-chart', {{ fig_month_json | safe }}.data, {{ fig_month_json | safe }}.layout);
+        {% endif %}
+        Plotly.newPlot('cause-chart', {{ cause_json | safe }}.data, {{ cause_json | safe }}.layout);
+        Plotly.newPlot('trend-chart', {{ trend_json | safe }}.data, {{ trend_json | safe }}.layout);
+    </script>
+</body>
+
+</html>
