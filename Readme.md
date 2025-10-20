@@ -70,13 +70,6 @@ python -m venv venv
 venv\Scripts\activate
 # macOS/Linux
 source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the Streamlit app
-streamlit run app.py
-Open in browser: http://localhost:8501
 ```
 ## 📊 Features
 
