@@ -1,19 +1,19 @@
 # 🇮🇳 India Road Accident Analyzer and Severity Predictor
 
-An **interactive Streamlit dashboard** to analyze road accidents in India, visualize accident trends, causes, and hotspots, and predict accident severity using machine learning.
+An **interactive Streamlit dashboard** to analyze road accidents in India, visualize trends, causes, hotspots, and predict accident severity using machine learning.
 
 ---
 
 ## 🧾 Project Description
 
-This project provides an **interactive web application** to explore road accident data at the **state, city, and year levels**.  
-It integrates:
+This project provides an interactive web app to explore road accident data at **state, city, and year levels**.  
+It includes:
 
-- **Data visualization** (Plotly charts, bar/line/area/pie charts)  
-- **Geospatial analysis** (Folium maps for accident hotspots)  
+- **Data Visualization** (Plotly charts: bar, pie, line, area, scatter)  
+- **Geospatial Analysis** (Folium maps for accident hotspots)  
 - **Machine Learning** (Random Forest Classifier for accident severity prediction)  
 
-The dashboard helps **researchers, policymakers, and road safety analysts** gain insights and identify accident-prone areas.
+Ideal for researchers, policymakers, and road safety analysts.
 
 ---
 
@@ -34,66 +34,59 @@ India_Road_Accident_Analyzer_and_Severity_Predictor/
 ├── templates/
 │ └── dashboard.html
 ├── .gitignore
+├── requirements.txt
 └── README.md
 
+yaml
+Copy code
 
 ---
 
 ## 📥 Dataset Setup
 
-**Note:** Large datasets (over 100 MB) are **not included** in this repo.  
+**Note:** Large datasets (>100MB) are not included.  
 
-1. Create a folder `data/` inside the project root.  
-2. Place your CSV datasets in the folder:
+1. Create a `data/` folder in the project root.  
+2. Place the CSV files there: `dataset1.csv` to `dataset6.csv`.  
+3. Recommended sources:  
+   - [NYC Motor Vehicle Collisions](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)  
+   - [India Open Government Data](https://data.gov.in)  
 
-
-data/
-├── dataset1.csv
-├── dataset2.csv
-├── dataset3.csv
-├── dataset4.csv
-├── dataset5.csv
-└── dataset6.csv
-
-3. Recommended sources for datasets:
-- [NYC Motor Vehicle Collisions](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)  
-- [India Open Government Data](https://data.gov.in)  
-
-> Tip: For demo purposes, you can use a **smaller sample CSV** (first few thousand rows).
+> For demo, you can use a smaller sample of rows.
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Installation & Run
 
-### 1️⃣ Clone the Repository
 ```bash
+# Clone repository
 git clone https://github.com/<your-username>/India_Road_Accident_Analyzer_and_Severity_Predictor.git
 cd India_Road_Accident_Analyzer_and_Severity_Predictor
 
-2️⃣ Create a Virtual Environment (Optional but Recommended)
+# Create virtual environment
 python -m venv venv
-# Windows
+
+# Activate (Windows)
 venv\Scripts\activate
 # macOS/Linux
 source venv/bin/activate
 
-3️⃣ Run the App
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the Streamlit app
 streamlit run app.py
-
-
-Open your browser at http://localhost:8501
+Open in browser: http://localhost:8501
 
 📊 Features
-
 Dynamic Filters: Filter by State, City, or Year
 
-Key Metrics: Total accidents, fatalities, and casualties
+Key Metrics: Total accidents, fatalities, casualties
 
-Visualizations:
-
+Visualizations
 Pie chart: Accident severity
 
-Bar charts: Vehicle type, day of week, causes, and time of day
+Bar charts: Vehicle type, day of week, causes, time of day
 
 Area chart: Monthly trends
 
@@ -106,7 +99,6 @@ Interactive Map: Accident hotspots with Folium
 ML Prediction: Predict accident severity using vehicle type, day of week, fatalities, and casualties
 
 🧠 Machine Learning Module
-
 Model: Random Forest Classifier
 
 Features: Vehicle Type, Day of Week, Number of Fatalities, Number of Casualties
@@ -116,9 +108,8 @@ Target: Accident Severity
 Usage: Enter values in the sidebar and predict severity instantly
 
 🌐 Tech Stack
-
 Python, Streamlit, Pandas, Plotly, Folium
 
-Scikit-learn (ML)
+Scikit-learn
 
-HTML/CSS templates for dashboard styling
+HTML/CSS templates
