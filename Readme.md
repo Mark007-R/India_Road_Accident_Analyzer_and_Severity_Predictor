@@ -77,6 +77,7 @@ pip install -r requirements.txt
 # Run the Streamlit app
 streamlit run app.py
 Open in browser: http://localhost:8501
+```
 ## 📊 Features
 
 - **Dynamic Filters:** Filter by State, City, or Year  
