@@ -205,22 +205,6 @@ with tab1:
             st.plotly_chart(fig_time, use_container_width=True)
             color_idx = 1 - color_idx
 
-    st.subheader("🗺️ Accident Hotspots Map")
-    if 'Latitude' in ds1_filtered.columns and 'Longitude' in ds1_filtered.columns:
-        ds_map = ds1_filtered.dropna(subset=['Latitude','Longitude'])
-        m = folium.Map(location=[20.5937, 78.9629], zoom_start=5)
-        for _, row in ds_map.iterrows():
-            folium.CircleMarker(
-                location=[row['Latitude'], row['Longitude']],
-                radius=6,
-                popup=f"<b>{row['City Name']}</b><br>Severity: {row['Accident Severity']}",
-                color='red' if row['Accident Severity']=="Serious" else 'orange',
-                fill=True
-            ).add_to(m)
-        st_folium(m, width=700)
-    else:
-        st.info("No latitude/longitude available for map plotting.")
-
     st.subheader("🚦 Top Accident Causes in Million+ Cities")
     if {'Cause category', 'Count'}.issubset(ds2.columns):
         ds2_filtered = ds2.copy()
@@ -352,27 +336,6 @@ with tab2:
         fig_trend_years = px.line(reduce_year, x='Year', y=['Number of Fatalities','Number of Casualties'],
                                   markers=True, title="Yearly Trend")
         st.plotly_chart(fig_trend_years, use_container_width=True)
-
-    st.markdown("### 🌐 Accidents Heatmap by State")
-    if 'Latitude' in ds1.columns and 'Longitude' in ds1.columns:
-        heatmap_df = ds1.dropna(subset=['Latitude','Longitude'])
-        if selected_state_map != "All":
-            heatmap_df = heatmap_df[heatmap_df['State Name']==selected_state_map]
-        
-        if not heatmap_df.empty:
-            m = folium.Map(location=[20.5937,78.9629], zoom_start=5)
-            for _, row in heatmap_df.iterrows():
-                folium.CircleMarker(location=[row['Latitude'],row['Longitude']],
-                                    radius=5,
-                                    color='red' if row['Number of Fatalities']>0 else 'orange',
-                                    fill=True,
-                                    popup=f"{row['State Name']}<br>Fatalities: {row['Number of Fatalities']}<br>Casualties: {row['Number of Casualties']}"
-                                    ).add_to(m)
-            st_folium(m, width=700, key="map2")
-        else:
-            st.info("No data to plot heatmap for this selection.")
-    else:
-        st.info("No latitude/longitude data available for heatmap.")
 
 # ----------------------------------------------------------
 # TAB 3: ADVANCED FORECASTING + SCENARIO PREDICTION
