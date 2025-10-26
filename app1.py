@@ -2,14 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import folium
-from folium import PolyLine
 from streamlit_folium import st_folium
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from statsmodels.tsa.arima.model import ARIMA
 import numpy as np
-import random # Added for simulation
 
 # ----------------------------------------------------------
 # Page Setup
@@ -19,36 +17,22 @@ st.set_page_config(page_title="India Road Accidents Analysis", layout="wide")
 # ----------------------------------------------------------
 # Data Loading
 # ----------------------------------------------------------
-# Wrap in try/except so the app can run to show Tab 4
-# even if the CSVs are missing.
-try:
-    @st.cache_data
-    def load_data():
-        ds1 = pd.read_csv("data/dataset1.csv")
-        ds2 = pd.read_csv("data/dataset2.csv")
-        ds3 = pd.read_csv("data/dataset3.csv")
-        ds4 = pd.read_csv("data/dataset4.csv")
-        ds5 = pd.read_csv("data/dataset5.csv")
-        ds6 = pd.read_csv("data/dataset6.csv")
-        return ds1, ds2, ds3, ds4, ds5, ds6
-    
-    ds1, ds2, ds3, ds4, ds5, ds6 = load_data()
-    
-except FileNotFoundError:
-    st.error("CSV data files not found in 'data' folder. Tabs 1-3 will be limited. Tab 4 will use simulated data.")
-    # Create empty dataframes so the app doesn't crash
-    ds1 = pd.DataFrame(columns=['State Name', 'City Name', 'Year', 'Number of Fatalities', 'Number of Casualties', 'Accident Severity', 'Vehicle Type Involved', 'Day of Week', 'Latitude', 'Longitude'])
-    ds2 = pd.DataFrame(columns=['Cause category', 'Count', 'Million Plus Cities'])
-    ds3 = pd.DataFrame() # Add columns as needed
-    ds4 = pd.DataFrame(columns=['STATE/UT', 'YEAR', 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'])
-    ds5 = pd.DataFrame(columns=['STATE/UT', 'YEAR']) # Add time columns as needed
-    ds6 = pd.DataFrame(columns=['Years', 'Total Number of Road Accidents (in numbers)'])
+@st.cache_data
+def load_data():
+    ds1 = pd.read_csv("data/dataset1.csv")
+    ds2 = pd.read_csv("data/dataset2.csv")
+    ds3 = pd.read_csv("data/dataset3.csv")
+    ds4 = pd.read_csv("data/dataset4.csv")
+    ds5 = pd.read_csv("data/dataset5.csv")
+    ds6 = pd.read_csv("data/dataset6.csv")
+    return ds1, ds2, ds3, ds4, ds5, ds6
 
+ds1, ds2, ds3, ds4, ds5, ds6 = load_data()
 
 # ----------------------------------------------------------
-# Tabs (Dashboard + MapReduce + Forecast + Route Planner)
+# Tabs (Dashboard + MapReduce + Forecast)
 # ----------------------------------------------------------
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Dashboard", "🧠 MapReduce Insights", "🚦 Future Forecasting", "🗺️ Safe Route Planner"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Dashboard", "🧠 MapReduce Insights", "🚦 Future Forecasting","Prediction"])
 
 # ----------------------------------------------------------
 # TAB 1: MAIN DASHBOARD
@@ -172,7 +156,6 @@ with tab1:
     if selected_state != "All":
         ds4_filtered = ds4[ds4['STATE/UT'] == selected_state]
         if selected_year != "All":
-            # Ensure selected_year is converted to int if it's a string
             ds4_filtered = ds4_filtered[ds4_filtered['YEAR'] == int(selected_year)]
         if not ds4_filtered.empty:
             months = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER']
@@ -187,13 +170,12 @@ with tab1:
             st.plotly_chart(fig_month, use_container_width=True)
             color_idx = 1 - color_idx
 
-    if selected_state != "All" and not ds5.empty:
+    if selected_state != "All":
         ds5_filtered = ds5[ds5['STATE/UT'] == selected_state]
         if selected_year != "All":
             ds5_filtered = ds5_filtered[ds5_filtered['YEAR'] == int(selected_year)]
         if not ds5_filtered.empty:
-            # Assuming time columns are from index 2 up to the last one (e.g., 'TOTAL')
-            time_cols = ds5.columns[2:-1] 
+            time_cols = ds5.columns[2:-1]
             time_counts = ds5_filtered[time_cols].iloc[0]
             fig_time = px.bar(
                 x=time_cols,
@@ -240,17 +222,16 @@ with tab1:
             color_idx = 1 - color_idx
 
     st.subheader("📈 Long-term Accident Trends in India")
-    if not ds6.empty:
-        fig_trend = px.line(
-            ds6,
-            x='Years',
-            y='Total Number of Road Accidents (in numbers)',
-            markers=True,
-            color_discrete_sequence=['#1f77b4'],
-            title="Total Road Accidents Over Years"
-        )
-        fig_trend.update_layout(xaxis_title="Year", yaxis_title="Accidents", hovermode="x unified")
-        st.plotly_chart(fig_trend, use_container_width=True)
+    fig_trend = px.line(
+        ds6,
+        x='Years',
+        y='Total Number of Road Accidents (in numbers)',
+        markers=True,
+        color_discrete_sequence=['#1f77b4'],
+        title="Total Road Accidents Over Years"
+    )
+    fig_trend.update_layout(xaxis_title="Year", yaxis_title="Accidents", hovermode="x unified")
+    st.plotly_chart(fig_trend, use_container_width=True)
 
     if 'Number of Fatalities' in ds1_filtered.columns:
         st.subheader("⚠️ Severity vs Fatalities Scatter Plot")
@@ -268,53 +249,49 @@ with tab1:
     st.markdown("---")
     st.header("🤖 Accident Severity Prediction (ML Feature)")
 
-    if 'Accident Severity' in ds1.columns and not ds1.empty:
+    if 'Accident Severity' in ds1.columns:
         ml_df = ds1[['Vehicle Type Involved', 'Day of Week', 'Number of Fatalities', 'Number of Casualties', 'Accident Severity']].dropna()
-        
-        if not ml_df.empty:
-            le_vehicle = LabelEncoder()
-            le_day = LabelEncoder()
-            le_severity = LabelEncoder()
 
-            ml_df['Vehicle Type Involved'] = le_vehicle.fit_transform(ml_df['Vehicle Type Involved'])
-            ml_df['Day of Week'] = le_day.fit_transform(ml_df['Day of Week'])
-            ml_df['Accident Severity'] = le_severity.fit_transform(ml_df['Accident Severity'])
+        le_vehicle = LabelEncoder()
+        le_day = LabelEncoder()
+        le_severity = LabelEncoder()
 
-            X = ml_df[['Vehicle Type Involved', 'Day of Week', 'Number of Fatalities', 'Number of Casualties']]
-            y = ml_df['Accident Severity']
+        ml_df['Vehicle Type Involved'] = le_vehicle.fit_transform(ml_df['Vehicle Type Involved'])
+        ml_df['Day of Week'] = le_day.fit_transform(ml_df['Day of Week'])
+        ml_df['Accident Severity'] = le_severity.fit_transform(ml_df['Accident Severity'])
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            model = RandomForestClassifier(n_estimators=100, random_state=42)
-            model.fit(X_train, y_train)
+        X = ml_df[['Vehicle Type Involved', 'Day of Week', 'Number of Fatalities', 'Number of Casualties']]
+        y = ml_df['Accident Severity']
 
-            accuracy = model.score(X_test, y_test)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
 
-            st.subheader("Enter Accident Details to Predict Severity")
+        accuracy = model.score(X_test, y_test)
 
-            col1, col2 = st.columns(2)
-            with col1:
-                vehicle_input = st.selectbox("Vehicle Type", options=le_vehicle.classes_)
-                fatalities_input = st.number_input("Number of Fatalities", min_value=0, max_value=50, value=0)
-            with col2:
-                day_input = st.selectbox("Day of Week", options=le_day.classes_)
-                casualties_input = st.number_input("Number of Casualties", min_value=0, max_value=100, value=0)
+        st.subheader("Enter Accident Details to Predict Severity")
 
-            if st.button("Predict Severity 🚦"):
-                input_df = pd.DataFrame({
-                    'Vehicle Type Involved': [le_vehicle.transform([vehicle_input])[0]],
-                    'Day of Week': [le_day.transform([day_input])[0]],
-                    'Number of Fatalities': [fatalities_input],
-                    'Number of Casualties': [casualties_input]
-                })
+        col1, col2 = st.columns(2)
+        with col1:
+            vehicle_input = st.selectbox("Vehicle Type", options=le_vehicle.classes_)
+            fatalities_input = st.number_input("Number of Fatalities", min_value=0, max_value=50, value=0)
+        with col2:
+            day_input = st.selectbox("Day of Week", options=le_day.classes_)
+            casualties_input = st.number_input("Number of Casualties", min_value=0, max_value=100, value=0)
 
-                prediction = model.predict(input_df)
-                predicted_label = le_severity.inverse_transform(prediction)[0]
-                st.success(f"✅ Predicted Severity: **{predicted_label}**")
-        else:
-            st.warning("Not enough data to train ML model.")
+        if st.button("Predict Severity 🚦"):
+            input_df = pd.DataFrame({
+                'Vehicle Type Involved': [le_vehicle.transform([vehicle_input])[0]],
+                'Day of Week': [le_day.transform([day_input])[0]],
+                'Number of Fatalities': [fatalities_input],
+                'Number of Casualties': [casualties_input]
+            })
+
+            prediction = model.predict(input_df)
+            predicted_label = le_severity.inverse_transform(prediction)[0]
+            st.success(f"✅ Predicted Severity: **{predicted_label}**")
     else:
-        st.warning("ML Prediction cannot be run — 'Accident Severity' column missing or dataset is empty.")
-
+        st.warning("ML Prediction cannot be run — 'Accident Severity' column missing in dataset.")
 # ----------------------------------------------------------
 # TAB 2: MAPREDUCE INSIGHTS (ENHANCED)
 # ----------------------------------------------------------
@@ -325,8 +302,8 @@ with tab2:
     states_map = ["All"] + sorted(ds1['State Name'].dropna().unique())
     years_map = ["All"] + sorted(ds1['Year'].dropna().unique())
 
-    selected_state_map = st.selectbox("Select State for Analysis", states_map, key="map_state")
-    selected_year_map = st.selectbox("Select Year for Analysis", years_map, key="map_year")
+    selected_state_map = st.selectbox("Select State for Analysis", states_map)
+    selected_year_map = st.selectbox("Select Year for Analysis", years_map)
 
     map_df = ds1[['State Name', 'Year', 'Number of Fatalities', 'Number of Casualties']].dropna()
 
@@ -358,19 +335,15 @@ with tab2:
         heatmap_df = ds1.dropna(subset=['Latitude','Longitude'])
         if selected_state_map != "All":
             heatmap_df = heatmap_df[heatmap_df['State Name']==selected_state_map]
-        
-        if not heatmap_df.empty:
-            m = folium.Map(location=[20.5937,78.9629], zoom_start=5)
-            for _, row in heatmap_df.iterrows():
-                folium.CircleMarker(location=[row['Latitude'],row['Longitude']],
-                                    radius=5,
-                                    color='red' if row['Number of Fatalities']>0 else 'orange',
-                                    fill=True,
-                                    popup=f"{row['State Name']}<br>Fatalities: {row['Number of Fatalities']}<br>Casualties: {row['Number of Casualties']}"
-                                    ).add_to(m)
-            st_folium(m, width=700, key="map2")
-        else:
-            st.info("No data to plot heatmap for this selection.")
+        m = folium.Map(location=[20.5937,78.9629], zoom_start=5)
+        for _, row in heatmap_df.iterrows():
+            folium.CircleMarker(location=[row['Latitude'],row['Longitude']],
+                                radius=5,
+                                color='red' if row['Number of Fatalities']>0 else 'orange',
+                                fill=True,
+                                popup=f"{row['State Name']}<br>Fatalities: {row['Number of Fatalities']}<br>Casualties: {row['Number of Casualties']}"
+                               ).add_to(m)
+        st_folium(m, width=700)
     else:
         st.info("No latitude/longitude data available for heatmap.")
 
@@ -381,7 +354,7 @@ with tab3:
     st.title("🚦 Predict Next Year’s Fatalities & Casualties (ARIMA & Risk Prediction)")
 
     st.markdown("""
-    This section uses **ARIMA** for time-series forecasting 
+    This section uses **ARIMA** for time-series forecasting  
     and also allows **scenario-based risk prediction** using ML-like rules.
     """)
 
@@ -421,11 +394,11 @@ with tab3:
     # -------- Scenario-Based Inputs --------
     col1, col2 = st.columns(2)
     with col1:
-        weather = st.selectbox("Weather Condition", ["Clear", "Rainy", "Foggy", "Snowy", "Windy"], key="tab3_weather")
-        terrain = st.selectbox("Terrain Type", ["Flat", "Hilly", "Mountainous"], key="tab3_terrain")
+        weather = st.selectbox("Weather Condition", ["Clear", "Rainy", "Foggy", "Snowy", "Windy"])
+        terrain = st.selectbox("Terrain Type", ["Flat", "Hilly", "Mountainous"])
     with col2:
-        traffic = st.slider("Traffic Density (vehicles/km)", min_value=0, max_value=200, value=50, key="tab3_traffic")
-        visibility = st.slider("Visibility (meters)", min_value=10, max_value=1000, value=500, key="tab3_visibility")
+        traffic = st.slider("Traffic Density (vehicles/km)", min_value=0, max_value=200, value=50)
+        visibility = st.slider("Visibility (meters)", min_value=10, max_value=1000, value=500)
 
     st.markdown("Click the button below to calculate **risk score** based on your inputs.")
 
@@ -447,7 +420,7 @@ with tab3:
             risk += 10
         return min(round(risk), 100)
 
-    if st.button("Predict Accident Risk 🚦", key="tab3_predict"):
+    if st.button("Predict Accident Risk 🚦"):
         risk_score = calculate_risk(weather, terrain, traffic, visibility)
         st.subheader(f"⚠️ Predicted Accident Risk: **{risk_score}%**")
         if risk_score > 70:
@@ -459,25 +432,19 @@ with tab3:
 
     st.markdown("---")
     st.info("""
-    ✅ **Scenario-based prediction** considers environmental and traffic factors 
+    ✅ **Scenario-based prediction** considers environmental and traffic factors  
     alongside historical trends (from ARIMA) for safer decision-making.
     """)
 
 # ----------------------------------------------------------
-# TAB 4: SAFE ROUTE PLANNER
+# NEW TAB 4: SAFE ROUTE PLANNER
 # ----------------------------------------------------------
 with tab4:
     st.title("🗺️ Safe Route Planner")
     st.markdown("Get route suggestions based on safety, historical accident data, and simulated traffic.")
 
-    # --- Initialize session state ---
-    # This will "remember" our results
-    if "routes_found" not in st.session_state:
-        st.session_state.routes_found = False
-        st.session_state.best_route = None
-        st.session_state.analyzed_routes = []
-
     # --- Hardcoded coordinates (for example) ---
+    # In a real app, use a geocoding API (like geopy)
     CITY_COORDS = {
         "Mumbai": (19.0760, 72.8777),
         "Goa": (15.2993, 74.1240),
@@ -544,6 +511,7 @@ with tab4:
             reasoning.append(f"+35 (Weather: {weather})")
         
         # 2. Month Penalty (e.g., Monsoon)
+        # In a real app, you'd query ds4 here for this route
         monsoon_months = ["June", "July", "August", "September", "October"]
         if month in monsoon_months:
             final_score += 15
@@ -565,29 +533,24 @@ with tab4:
     
     col1, col2 = st.columns(2)
     with col1:
-        origin_city = st.selectbox("Select Origin", options=CITY_COORDS.keys(), index=0, key="tab4_origin")
+        origin_city = st.selectbox("Select Origin", options=CITY_COORDS.keys(), index=0)
         month = st.selectbox(
             "Month of Travel", 
             options=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-            index=9, # Defaults to October
-            key="tab4_month"
+            index=9 # Defaults to October
         )
     
     with col2:
-        dest_city = st.selectbox("Select Destination", options=CITY_COORDS.keys(), index=1, key="tab4_dest")
+        dest_city = st.selectbox("Select Destination", options=CITY_COORDS.keys(), index=1)
         weather = st.selectbox(
             "Weather Conditions",
             options=["Clear", "Rainy", "Foggy"],
-            index=1, # Defaults to Rainy
-            key="tab4_weather"
+            index=1 # Defaults to Rainy
         )
 
-    # --- This is the "Controller" ---
-    # When clicked, it runs the logic and SAVES the results in st.session_state
-    if st.button("Find Safest Route 🚦", key="tab4_find_route"):
+    if st.button("Find Safest Route Find Safest Route 🚦"):
         if origin_city == dest_city:
             st.error("Origin and Destination cannot be the same.")
-            st.session_state.routes_found = False # <-- NEW: Reset state
         else:
             # 1. Simulate API call
             mock_routes = get_mock_routes(origin_city, dest_city)
@@ -597,51 +560,42 @@ with tab4:
             for route in mock_routes:
                 analyzed_routes.append(analyze_route_safety(route, weather, month))
 
-            # 3. Find the best route
+            # 3. Find the best route (lowest score)
             best_route = min(analyzed_routes, key=lambda x: x['final_score'])
 
-            # 4. Save results to session state
-            st.session_state.routes_found = True
-            st.session_state.best_route = best_route
-            st.session_state.analyzed_routes = analyzed_routes
+            # 4. Display Recommendation
+            st.success(f"🏆 Recommendation: **{best_route['name']}**")
+            st.markdown(f"""
+            This route is recommended due to the lowest overall risk score.
+            - **Final Risk Score:** `{best_route['final_score']}`
+            - **Simulated Traffic:** `{best_route['simulated_traffic']}`
+            - **Distance:** `{best_route['distance_km']}` km
+            """)
+            
+            # 5. Display Map
+            st.subheader("Route Comparison Map")
+            m = folium.Map(location=CITY_COORDS[origin_city], zoom_start=7)
 
-    # --- This is the "View" ---
-    # This block is now OUTSIDE the button `if` statement.
-    # It will run every time, but only shows output if 'routes_found' is True.
-    if st.session_state.routes_found:
-        # 4. Display Recommendation (reading from state)
-        st.success(f"🏆 Recommendation: **{st.session_state.best_route['name']}**")
-        st.markdown(f"""
-        This route is recommended due to the lowest overall risk score.
-        - **Final Risk Score:** `{st.session_state.best_route['final_score']}`
-        - **Simulated Traffic:** `{st.session_state.best_route['simulated_traffic']}`
-        - **Distance:** `{st.session_state.best_route['distance_km']}` km
-        """)
-        
-        # 5. Display Map (reading from state)
-        st.subheader("Route Comparison Map")
-        
-        # We must re-create the map every time
-        m = folium.Map(location=CITY_COORDS[origin_city], zoom_start=7)
+            # Add markers for origin and destination
+            folium.Marker(CITY_COORDS[origin_city], popup=f"ORIGIN: {origin_city}", icon=folium.Icon(color="green")).add_to(m)
+            folium.Marker(CITY_COORDS[dest_city], popup=f"DESTINATION: {dest_city}", icon=folium.Icon(color="red")).add_to(m)
 
-        folium.Marker(CITY_COORDS[origin_city], popup=f"ORIGIN: {origin_city}", icon=folium.Icon(color="green")).add_to(m)
-        folium.Marker(CITY_COORDS[dest_city], popup=f"DESTINATION: {dest_city}", icon=folium.Icon(color="red")).add_to(m)
+            # Draw route polylines
+            for route in analyzed_routes:
+                folium.PolyLine(
+                    route['path'],
+                    color=route['color'],
+                    weight=5,
+                    opacity=0.8,
+                    popup=f"<b>{route['name']}</b><br>Risk Score: {route['final_score']}<br>Traffic: {route['simulated_traffic']}"
+                ).add_to(m)
 
-        for route in st.session_state.analyzed_routes:
-            folium.PolyLine(
-                route['path'],
-                color=route['color'],
-                weight=5,
-                opacity=0.8,
-                popup=f"<b>{route['name']}</b><br>Risk Score: {route['final_score']}<br>Traffic: {route['simulated_traffic']}"
-            ).add_to(m)
-
-        st_folium(m, width=725, height=500, key="map4")
-        
-        # 6. Show detailed scoring (reading from state)
-        with st.expander("See Detailed Risk Scoring"):
-            for route in st.session_state.analyzed_routes:
-                st.markdown(f"#### {route['name']}")
-                st.markdown(f"- **Final Score: {route['final_score']}**")
-                for reason in route['reasoning']:
-                    st.text(f"  - {reason}")
+            st_folium(m, width=725, height=500)
+            
+            # 6. Show detailed scoring
+            with st.expander("See Detailed Risk Scoring"):
+                for route in analyzed_routes:
+                    st.markdown(f"#### {route['name']}")
+                    st.markdown(f"- **Final Score: {route['final_score']}**")
+                    for reason in route['reasoning']:
+                        st.text(f"  - {reason}")
