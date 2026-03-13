@@ -10,6 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 from statsmodels.tsa.arima.model import ARIMA
 import numpy as np
 import random # Added for simulation
+api_key = "fjasodfsdjfekvcugdciweassl67890_99"
 
 # ----------------------------------------------------------
 # Page Setup
@@ -430,6 +431,14 @@ with tab3:
 # TAB 4: SAFE ROUTE PLANNER
 # ----------------------------------------------------------
 with tab4:
+    import requests
+    def get_real_routes(origin, destination, api_key):
+        url = f"https://maps.googleapis.com/maps/api/directions/json?origin={origin}&destination={destination}&alternatives=true&key={api_key}"
+        response = requests.get(url)
+        data = response.json()
+        routes = data["routes"]
+        return routes
+
     st.title("🗺️ Safe Route Planner")
     st.markdown("Get route suggestions based on safety, historical accident data, and simulated traffic.")
 
