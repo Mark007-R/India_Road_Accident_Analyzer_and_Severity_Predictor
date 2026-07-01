@@ -1,5 +1,7 @@
 # 🇮🇳 India Road Accidents Analysis & Safe Route Planner
 
+> 🔗 **Live demo:** https://iambatman07-saferouteanalyzer.hf.space · [HF Space](https://huggingface.co/spaces/IamBatman07/SafeRouteAnalyzer)
+
 An **interactive Streamlit app** to explore road accidents in India, visualize trends and causes, forecast future fatalities/casualties, and plan safer routes using historical accident data, environmental factors, and simulated traffic.
 
 ---
