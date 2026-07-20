@@ -1,4 +1,4 @@
-# 🇮🇳 India Road Accidents Analysis & Safe Route Planner
+# Road-Safety-Analyzer
 
 > 🔗 **Live demo:** https://iambatman07-saferouteanalyzer.hf.space · [HF Space](https://huggingface.co/spaces/IamBatman07/SafeRouteAnalyzer)
 
